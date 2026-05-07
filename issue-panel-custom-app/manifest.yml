@@ -1,0 +1,26 @@
+modules:
+  jira:issuePanel:
+    - key: issue-panel-custom-app-hello-world-issue-panel
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: issue-panel-custom-app
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
+      viewportSize: medium
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/index.jsx
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/74fc7237-162e-4c41-9147-e72b82a14c8c
+permissions:
+  scopes:
+    - read:issue:jira
+    - read:jira-work
