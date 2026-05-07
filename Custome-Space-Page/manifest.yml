@@ -1,0 +1,25 @@
+modules:
+  confluence:spacePage:
+    - key: custom-space-page-hello-world-space-page
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: Custom Space Page
+      route: hello-world
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/index.jsx
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/9c2fc495-58be-494e-9639-37416b052fbd
+permissions:
+  scopes:
+    - read:confluence-space.summary
+    - read:space:confluence
