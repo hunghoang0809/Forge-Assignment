@@ -1,0 +1,29 @@
+modules:
+  jira:projectPage:
+    - key: project-hub-project-page
+      resource: main
+      resolver:
+        function: resolver
+      title: Project Hub
+      pages:
+        - title: Overview
+          route: overview
+        - title: Recent Issues
+          route: recent-issues
+        - title: Team
+          route: team
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/custom-ui
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/83c8c909-f7fe-45bd-876e-addff3c69e06
+permissions:
+  scopes:
+    - read:jira-work
