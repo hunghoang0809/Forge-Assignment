@@ -3,9 +3,20 @@ import api, { route } from '@forge/api';
 
 const resolver = new Resolver();
 
-// Fetch available issue types from Jira for the dropdown
+// Fetch available projects from Jira
+resolver.define('getProjects', async () => {
+  const response = await api.asUser().requestJira(route`/rest/api/3/project`);
+  if (!response.ok) {
+    console.error(`Failed to fetch projects: ${response.status}`);
+    return [];
+  }
+  const projects = await response.json();
+  return projects.map(p => ({ id: p.id, key: p.key, name: p.name }));
+});
+
+// Fetch available issue types from Jira
 resolver.define('getIssueTypes', async () => {
-  const response = await api.asApp().requestJira(route`/rest/api/3/issuetype`);
+  const response = await api.asUser().requestJira(route`/rest/api/3/issuetype`);
   if (!response.ok) {
     console.error(`Failed to fetch issue types: ${response.status}`);
     return [];
@@ -17,11 +28,11 @@ resolver.define('getIssueTypes', async () => {
     .map(t => ({ id: t.id, name: t.name }));
 });
 
-// Create a Jira issue with the given project key, summary, and issue type
+// Create a Jira issue
 resolver.define('createIssue', async ({ payload }) => {
   const { projectKey, summary, issueType } = payload;
 
-  const response = await api.asApp().requestJira(route`/rest/api/3/issue`, {
+  const response = await api.asUser().requestJira(route`/rest/api/3/issue`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -43,7 +54,7 @@ resolver.define('createIssue', async ({ payload }) => {
   return {
     success: true,
     key: result.key,
-    self: result.self
+    id: result.id
   };
 });
 

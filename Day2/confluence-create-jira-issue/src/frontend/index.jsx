@@ -1,11 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import ForgeReconciler, { Text, Heading, Box, Stack, Textfield, Select, Button, SectionMessage, Spinner, Lozenge } from '@forge/react';
+import ForgeReconciler, { 
+  Text, 
+  Heading, 
+  Box, 
+  Stack, 
+  Textfield, 
+  Select, 
+  Button, 
+  SectionMessage, 
+  Spinner, 
+  Link
+} from '@forge/react';
 import { invoke } from '@forge/bridge';
 import { useProductContext } from '@forge/react';
 
 const App = () => {
+  const context = useProductContext();
   const [selectedText, setSelectedText] = useState('');
   const [projectKey, setProjectKey] = useState('');
+  const [projects, setProjects] = useState([]);
   const [issueType, setIssueType] = useState('');
   const [issueTypes, setIssueTypes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,36 +26,42 @@ const App = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  // Get selected text from the product context
-  const context = useProductContext();
-
-  // Extract selectedText from context and fetch issue types on mount
+  // Lấy text được bôi đen từ context
   useEffect(() => {
     if (context) {
       setSelectedText(context.extension?.selectedText || '');
     }
   }, [context]);
 
+  // Load danh sách Project và Issue Type khi mở modal
   useEffect(() => {
     (async () => {
       try {
-        const types = await invoke('getIssueTypes');
-        setIssueTypes(types);
-        if (types.length > 0) {
-          setIssueType(types[0].name);
+        const [projData, typeData] = await Promise.all([
+          invoke('getProjects'),
+          invoke('getIssueTypes')
+        ]);
+        
+        setProjects(projData);
+        if (projData.length > 0) {
+          setProjectKey(projData[0].key);
+        }
+
+        setIssueTypes(typeData);
+        if (typeData.length > 0) {
+          setIssueType(typeData[0].name);
         }
       } catch (e) {
-        console.error('Failed to fetch issue types:', e);
-        setError('Could not load issue types.');
+        console.error('Failed to fetch data:', e);
+        setError('Could not load Jira configuration.');
       }
-
       setLoading(false);
     })();
   }, []);
 
   const handleSubmit = async () => {
-    if (!projectKey.trim() || !issueType) {
-      setError('Please fill in Project Key and Issue Type.');
+    if (!projectKey || !issueType || !selectedText.trim()) {
+      setError('Vui lòng chọn đầy đủ Project, Issue Type và nhập Summary.');
       return;
     }
 
@@ -51,60 +70,89 @@ const App = () => {
 
     try {
       const res = await invoke('createIssue', {
-        projectKey: projectKey.trim().toUpperCase(),
-        summary: selectedText || 'New issue from Confluence',
+        projectKey: projectKey,
+        summary: selectedText.trim(),
         issueType: issueType
       });
 
       if (res.success) {
         setResult(res);
       } else {
-        setError(res.error || 'Failed to create issue.');
+        setError(res.error || 'Không thể tạo issue.');
       }
     } catch (e) {
-      setError('An error occurred while creating the issue.');
+      setError('Đã có lỗi xảy ra khi tạo issue.');
       console.error(e);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <Spinner label="Loading..." />;
+  if (loading) return <Spinner label="Đang tải..." />;
 
-  // Show success result with link to created issue
+  // Màn hình thông báo thành công
   if (result) {
+    const issueUrl = `${context?.siteUrl}/browse/${result.key}`;
     return (
       <Box padding="space.200">
-        <SectionMessage appearance="success">
-          <Stack space="space.100">
-            <Text>Issue created successfully!</Text>
-            <Lozenge appearance="success">{result.key}</Lozenge>
-          </Stack>
-        </SectionMessage>
+        <Stack space="space.200" alignBlock="center">
+          <SectionMessage appearance="success">
+            <Text>Issue <strong>{result.key}</strong> đã được tạo thành công!</Text>
+          </SectionMessage>
+          <Link href={issueUrl} openNewTab>
+            Xem Issue trên Jira
+          </Link>
+          <Button onClick={() => setResult(null)}>Tạo thêm issue khác</Button>
+        </Stack>
       </Box>
     );
   }
 
+  const projectOptions = projects.map(p => ({ label: `${p.name} (${p.key})`, value: p.key }));
   const issueTypeOptions = issueTypes.map(t => ({ label: t.name, value: t.name }));
 
   return (
     <Box padding="space.200">
-      <Stack space="space.200">
-        <Heading size="medium">Create Jira Issue</Heading>
-        {selectedText && (
-          <SectionMessage appearance="info">
-            <Text>Selected text will be used as the issue summary.</Text>
-          </SectionMessage>
-        )}
+      <Stack space="space.300">
+        <Heading size="medium">Tạo Jira Issue từ văn bản chọn</Heading>
+        
         {error && (
           <SectionMessage appearance="error">
             <Text>{error}</Text>
           </SectionMessage>
         )}
-        <Textfield label="Project Key" value={projectKey} onChange={setProjectKey} placeholder="e.g. PROJ" />
-        <Textfield label="Summary" value={selectedText} onChange={setSelectedText} />
-        <Select label="Issue Type" options={issueTypeOptions} onChange={setIssueType} value={issueType} />
-        <Button text="Create Issue" onClick={handleSubmit} appearance="primary" isDisabled={submitting} />
+
+        <Stack space="space.200">
+          <Select 
+            label="Chọn Dự án (Project)" 
+            options={projectOptions} 
+            onChange={(val) => setProjectKey(val)} 
+            value={projectKey} 
+          />
+          
+          <Select 
+            label="Loại Issue (Issue Type)" 
+            options={issueTypeOptions} 
+            onChange={(val) => setIssueType(val)} 
+            value={issueType} 
+          />
+
+          <Textfield 
+            label="Tóm tắt (Summary)" 
+            value={selectedText} 
+            onChange={setSelectedText} 
+            placeholder="Nhập tóm tắt issue..."
+          />
+        </Stack>
+
+        {/* Cố định lỗi Button: Dùng children thay vì prop text */}
+        <Button 
+          onClick={handleSubmit} 
+          appearance="primary" 
+          isDisabled={submitting}
+        >
+          {submitting ? "Đang tạo..." : "Tạo Issue"}
+        </Button>
       </Stack>
     </Box>
   );
