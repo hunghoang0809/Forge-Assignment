@@ -56,8 +56,8 @@ const App = () => {
             <Text>API key saved successfully!</Text>
           </SectionMessage>
         )}
-        <Textfield label="API Key" value={apiKey} onChange={setApiKey} placeholder="Enter your API key" />
-        <Button text="Save" onClick={handleSave} appearance="primary" isDisabled={saving} />
+        <Textfield label="API Key" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="Enter your API key" />
+        <Button onClick={handleSave} appearance="primary" isDisabled={saving}>Save</Button>
       </Stack>
     </Box>
   );
