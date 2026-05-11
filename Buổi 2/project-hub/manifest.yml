@@ -17,10 +17,10 @@ modules:
       handler: index.handler
 resources:
   - key: main
-    path: src/frontend/custom-ui
+    path: dist/frontend
 app:
   runtime:
-    name: nodejs24.x
+    name: nodejs22.x
     memoryMB: 256
     architecture: arm64
   id: ari:cloud:ecosystem::app/83c8c909-f7fe-45bd-876e-addff3c69e06
