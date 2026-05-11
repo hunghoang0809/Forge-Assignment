@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ForgeReconciler, { Text, Heading, Box, Inline, Stack, Strong, Spinner } from '@forge/react';
+import ForgeReconciler, { Text, Heading, Box, Inline, Stack, Strong, Spinner, Lozenge } from '@forge/react';
 import { invoke } from '@forge/bridge';
 
 const App = () => {
@@ -28,7 +28,6 @@ const App = () => {
   return (
     <Box padding="space.200">
       <Stack space="space.200">
-        <Heading size="medium">Risk Context Details</Heading>
         <Stack space="space.100">
           <Inline space="space.100">
             <Strong>Priority:</Strong>
