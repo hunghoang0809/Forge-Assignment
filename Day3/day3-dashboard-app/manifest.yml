@@ -1,0 +1,23 @@
+modules:
+  jira:projectPage:
+    - key: exercise-3-5-dashboard
+      resource: resource-3-5
+      title: "Bài 3.5: Dashboard"
+      render: native
+      resolver:
+        function: resolver
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: resource-3-5
+    path: src/frontend/project-health.jsx
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/bedd205a-4219-436d-b4b1-f76e5cebbf08
+permissions:
+  scopes:
+    - read:jira-work

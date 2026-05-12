@@ -1,0 +1,52 @@
+modules:
+  jira:issuePanel:
+    - key: exercise-3-1-context
+      resource: resource-3-1
+      title: "Bài 3.1: Debug Info"
+      icon: https://developer.atlassian.com/platform/forge/images/issue-panel-icon.svg
+      render: native
+      resolver:
+        function: resolver
+    - key: exercise-3-2-details
+      resource: resource-3-2
+      title: "Bài 3.2: Issue Details"
+      icon: https://developer.atlassian.com/platform/forge/images/issue-panel-icon.svg
+      render: native
+      resolver:
+        function: resolver
+  jira:issueAction:
+    - key: exercise-3-3-note
+      resource: resource-3-3
+      title: "Bài 3.3: Add Quick Note"
+      render: native
+      resolver:
+        function: resolver
+  jira:projectPage:
+    - key: exercise-3-4-table
+      resource: resource-3-4
+      title: "Bài 3.4: Filter Issues"
+      render: native
+      resolver:
+        function: resolver
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: resource-3-1
+    path: src/frontend/context-display.jsx
+  - key: resource-3-2
+    path: src/frontend/issue-detail.jsx
+  - key: resource-3-3
+    path: src/frontend/quick-note.jsx
+  - key: resource-3-4
+    path: src/frontend/project-issues.jsx
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/e99e32f6-ae07-423b-9789-7da69e540946
+permissions:
+  scopes:
+    - read:jira-work
+    - storage:app
